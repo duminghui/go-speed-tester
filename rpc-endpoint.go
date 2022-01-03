@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	rpc2 "github.com/portto/solana-go-sdk/rpc"
 	"sort"
 	"sync"
 	"time"
@@ -70,6 +71,37 @@ func getFastestEndpoint(rpcs []*RpcInfo) string {
 			end := time.Now()
 			duration := end.Sub(start)
 			fmt.Printf("%s: %d %s\n", rc.Url, out.BlockHeight, duration)
+			speedInfos = append(speedInfos, speedInfo{
+				url:      rc.Url,
+				duration: end.Sub(start),
+			})
+			if len(speedInfos) == 1 {
+				wg.Done()
+			}
+		}(rc)
+	}
+	wg.Wait()
+	return speedInfos[0].url
+}
+
+func getFastestEndpoint2(rpcs []*RpcInfo) string {
+	wg := &sync.WaitGroup{}
+	var speedInfos []speedInfo
+	wg.Add(1)
+	for _, rc := range rpcs {
+		go func(rc *RpcInfo) {
+			start := time.Now()
+			rpcClient := rpc2.NewRpcClient(rc.Url)
+			out, err := rpcClient.GetEpochInfoWithConfig(context.Background(), rpc2.GetEpochInfoConfig{
+				Commitment: rpc2.CommitmentConfirmed,
+			})
+			if err != nil {
+				fmt.Printf("%s test speed error: %s\n", rc.Url, err)
+				return
+			}
+			end := time.Now()
+			duration := end.Sub(start)
+			fmt.Printf("2 %s: %d, %d, %s\n", rc.Url, out.ID, out.Result.Epoch, duration)
 			speedInfos = append(speedInfos, speedInfo{
 				url:      rc.Url,
 				duration: end.Sub(start),
