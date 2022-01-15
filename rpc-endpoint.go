@@ -52,8 +52,8 @@ type speedInfo struct {
 func getFastestEndpoint(rpcs []*RpcInfo) string {
 	wg := &sync.WaitGroup{}
 	var speedInfos []speedInfo
-	for _, rc := range rpcs {
-		for i := 0; i < 2; i++ {
+	for i := 0; i < 2; i++ {
+		for _, rc := range rpcs {
 			wg.Add(1)
 			go func(rc *RpcInfo) {
 				defer wg.Done()
@@ -69,15 +69,16 @@ func getFastestEndpoint(rpcs []*RpcInfo) string {
 				}
 				end := time.Now()
 				duration := end.Sub(start)
-				fmt.Printf("%35s: slot:%d, hash:%s, %s\n", rc.Url, out.Context.Slot, out.Value.Blockhash,
+				fmt.Printf("%35s: slot:%d, hash:%s,%s, %s\n", rc.Url, out.Context.Slot, out.Value.Blockhash,
+					time.Now().Format("2006-01-02 15:04:05.999"),
 					duration)
 				speedInfos = append(speedInfos, speedInfo{
 					url:      rc.Url,
 					duration: end.Sub(start),
 				})
 			}(rc)
-			time.Sleep(500 * time.Millisecond)
 		}
+		time.Sleep(500 * time.Millisecond)
 	}
 	wg.Wait()
 	return speedInfos[0].url
