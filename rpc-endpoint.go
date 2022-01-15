@@ -53,28 +53,31 @@ func getFastestEndpoint(rpcs []*RpcInfo) string {
 	wg := &sync.WaitGroup{}
 	var speedInfos []speedInfo
 	for _, rc := range rpcs {
-		wg.Add(1)
-		go func(rc *RpcInfo) {
-			defer wg.Done()
-			start := time.Now()
-			out, err := rpc.New(rc.Url).GetRecentBlockhash(context.Background(), rpc.CommitmentConfirmed)
-			if err != nil {
-				if strings.Index(err.Error(), context.Canceled.Error()) < 0 {
-					fmt.Printf("%s test speed error: %s\n", rc.Url, err)
-				} else {
-					fmt.Printf("Speed test cancel %s \n", rc.Url)
+		for i := 0; i < 2; i++ {
+			wg.Add(1)
+			go func(rc *RpcInfo) {
+				defer wg.Done()
+				start := time.Now()
+				out, err := rpc.New(rc.Url).GetRecentBlockhash(context.Background(), rpc.CommitmentConfirmed)
+				if err != nil {
+					if strings.Index(err.Error(), context.Canceled.Error()) < 0 {
+						fmt.Printf("%s test speed error: %s\n", rc.Url, err)
+					} else {
+						fmt.Printf("Speed test cancel %s \n", rc.Url)
+					}
+					return
 				}
-				return
-			}
-			end := time.Now()
-			duration := end.Sub(start)
-			fmt.Printf("%35s: slot:%d, hash:%s, %s\n", rc.Url, out.Context.Slot, out.Value.Blockhash,
-				duration)
-			speedInfos = append(speedInfos, speedInfo{
-				url:      rc.Url,
-				duration: end.Sub(start),
-			})
-		}(rc)
+				end := time.Now()
+				duration := end.Sub(start)
+				fmt.Printf("%35s: slot:%d, hash:%s, %s\n", rc.Url, out.Context.Slot, out.Value.Blockhash,
+					duration)
+				speedInfos = append(speedInfos, speedInfo{
+					url:      rc.Url,
+					duration: end.Sub(start),
+				})
+			}(rc)
+			time.Sleep(500 * time.Millisecond)
+		}
 	}
 	wg.Wait()
 	return speedInfos[0].url
