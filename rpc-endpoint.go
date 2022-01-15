@@ -79,6 +79,7 @@ func getFastestEndpoint(rpcs []*RpcInfo) string {
 			}(rc)
 		}
 		time.Sleep(500 * time.Millisecond)
+		fmt.Println("======")
 	}
 	wg.Wait()
 	return speedInfos[0].url
