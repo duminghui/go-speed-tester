@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/gagliardetto/solana-go"
@@ -36,6 +37,7 @@ func wsTest() {
 			if err != nil {
 				panic(err)
 			}
+			fmt.Println(time.Now())
 			spew.Dump(got)
 		}
 	}
