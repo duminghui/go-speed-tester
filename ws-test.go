@@ -16,7 +16,7 @@ func wsTest() {
 		panic(err)
 	}
 	defer client.Close()
-	program := solana.MustPublicKeyFromBase58("9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin") // serum
+	program := solana.MustPublicKeyFromBase58("DvVijge9HpEpfNVk8cTzdq2GuuF1eUcpVPGLf871HXFz") // serum
 
 	{
 		// Subscribe to log events that mention the provided pubkey:
