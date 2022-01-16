@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/gagliardetto/solana-go"
@@ -27,6 +28,7 @@ func wsTest() {
 		if err != nil {
 			panic(err)
 		}
+		fmt.Printf("Start LogsSubscribeMentions:%s\n", program)
 		defer sub.Unsubscribe()
 
 		for {
